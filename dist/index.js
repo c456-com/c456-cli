@@ -6,7 +6,7 @@ import { Command as Command13 } from "commander";
 // package.json
 var package_default = {
   name: "c456-cli",
-  version: "0.7.1",
+  version: "0.8.0",
   description: "C456 CLI - \u5185\u5BB9\u5F55\u5165\u4E0E\u6574\u7406\u5DE5\u5177",
   type: "module",
   bin: {
