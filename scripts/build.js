@@ -15,7 +15,15 @@ async function build() {
     format: "esm",
     target: "node20",
     outfile: join(rootDir, "dist", "index.js"),
-    external: ["commander", "open", "cfonts", "playwright-core"], // cfonts 为独立包（许可证见 node_modules/cfonts）
+    // @inquirer/prompts 链上有 yoctocolors-cjs 等 CJS，bundle 进 ESM 单文件会触发
+    // 「Dynamic require of "node:tty" is not supported」；与 Node 版本无关，勿打入 bundle。
+    external: [
+      "commander",
+      "open",
+      "cfonts",
+      "playwright-core",
+      "@inquirer/prompts",
+    ], // cfonts 为独立包（许可证见 node_modules/cfonts）
     minify: false,
     sourcemap: false,
   });
