@@ -114,6 +114,13 @@ playbookCmd
   .option("-t, --title <title>", "新标题")
   .option("-b, --body <text>", "新正文（不推荐直接传；请用 --body-file）")
   .option("--body-file <path>", "新正文文件路径（type: markdown_kramdown；建议写到当前目录 .tmp/）")
+  .option("--publish", "发布（申请公开）")
+  .option("--published", "直接发布（管理员专用）")
+  .option("--draft", "撤回为草稿")
+  .option("--favorited", "标记为收藏")
+  .option("--unfavorited", "取消收藏")
+  .option("--featured", "标记为精华")
+  .option("--unfeatured", "取消精华")
   .action(async (id, opts, cmd) => {
     const { apiKey, client } = resolveApi(cmd);
 
@@ -131,6 +138,13 @@ playbookCmd
     }
     if (opts.bodyFile) body.body = readTextFile(opts.bodyFile);
     if (opts.body) body.body = opts.body;
+    if (opts.publish) body.publication_status = "pending_review";
+    if (opts.published) body.publication_status = "published";
+    if (opts.draft) body.publication_status = "private";
+    if (opts.favorited) body.favorited = true;
+    if (opts.unfavorited) body.favorited = false;
+    if (opts.featured) body.featured = true;
+    if (opts.unfeatured) body.featured = false;
 
     try {
       await client.patch(`/playbooks/${id}`, body);

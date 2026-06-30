@@ -885,7 +885,7 @@ ${data.body || "(\u65E0)"}`);
     process.exit(1);
   }
 });
-playbookCmd.command("update").description("\u66F4\u65B0\u6253\u6CD5").argument("<id>", "\u6253\u6CD5 ID").option("-t, --title <title>", "\u65B0\u6807\u9898").option("-b, --body <text>", "\u65B0\u6B63\u6587\uFF08\u4E0D\u63A8\u8350\u76F4\u63A5\u4F20\uFF1B\u8BF7\u7528 --body-file\uFF09").option("--body-file <path>", "\u65B0\u6B63\u6587\u6587\u4EF6\u8DEF\u5F84\uFF08type: markdown_kramdown\uFF1B\u5EFA\u8BAE\u5199\u5230\u5F53\u524D\u76EE\u5F55 .tmp/\uFF09").action(async (id, opts, cmd) => {
+playbookCmd.command("update").description("\u66F4\u65B0\u6253\u6CD5").argument("<id>", "\u6253\u6CD5 ID").option("-t, --title <title>", "\u65B0\u6807\u9898").option("-b, --body <text>", "\u65B0\u6B63\u6587\uFF08\u4E0D\u63A8\u8350\u76F4\u63A5\u4F20\uFF1B\u8BF7\u7528 --body-file\uFF09").option("--body-file <path>", "\u65B0\u6B63\u6587\u6587\u4EF6\u8DEF\u5F84\uFF08type: markdown_kramdown\uFF1B\u5EFA\u8BAE\u5199\u5230\u5F53\u524D\u76EE\u5F55 .tmp/\uFF09").option("--publish", "\u53D1\u5E03\uFF08\u7533\u8BF7\u516C\u5F00\uFF09").option("--published", "\u76F4\u63A5\u53D1\u5E03\uFF08\u7BA1\u7406\u5458\u4E13\u7528\uFF09").option("--draft", "\u64A4\u56DE\u4E3A\u8349\u7A3F").option("--favorited", "\u6807\u8BB0\u4E3A\u6536\u85CF").option("--unfavorited", "\u53D6\u6D88\u6536\u85CF").option("--featured", "\u6807\u8BB0\u4E3A\u7CBE\u534E").option("--unfeatured", "\u53D6\u6D88\u7CBE\u534E").action(async (id, opts, cmd) => {
   const { apiKey, client } = resolveApi(cmd);
   if (!apiKey) {
     console.error("\u9519\u8BEF\uFF1A\u672A\u914D\u7F6E API Key");
@@ -899,6 +899,13 @@ playbookCmd.command("update").description("\u66F4\u65B0\u6253\u6CD5").argument("
   }
   if (opts.bodyFile) body.body = readTextFile(opts.bodyFile);
   if (opts.body) body.body = opts.body;
+  if (opts.publish) body.publication_status = "pending_review";
+  if (opts.published) body.publication_status = "published";
+  if (opts.draft) body.publication_status = "private";
+  if (opts.favorited) body.favorited = true;
+  if (opts.unfavorited) body.favorited = false;
+  if (opts.featured) body.featured = true;
+  if (opts.unfeatured) body.featured = false;
   try {
     await client.patch(`/playbooks/${id}`, body);
     console.log("\u2705 \u6253\u6CD5\u66F4\u65B0\u6210\u529F");
