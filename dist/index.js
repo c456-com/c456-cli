@@ -6,7 +6,7 @@ import { Command as Command13 } from "commander";
 // package.json
 var package_default = {
   name: "c456-cli",
-  version: "0.8.1",
+  version: "0.9.0",
   description: "C456 CLI - \u5185\u5BB9\u5F55\u5165\u4E0E\u6574\u7406\u5DE5\u5177",
   type: "module",
   bin: {
@@ -412,7 +412,7 @@ intake.command("show").description("\u67E5\u770B\u6536\u5F55\u8BE6\u60C5").argum
     process.exit(1);
   }
 });
-intake.command("update").description("\u66F4\u65B0\u6536\u5F55").argument("<id>", "\u6536\u5F55 ID").option("-t, --title <title>", "\u65B0\u6807\u9898").option("-b, --body <text>", "\u65B0\u6B63\u6587\uFF08\u4E0D\u63A8\u8350\u76F4\u63A5\u4F20\uFF1B\u8BF7\u7528 --body-file\uFF09").option("--body-file <path>", "\u65B0\u6B63\u6587\u6587\u4EF6\u8DEF\u5F84\uFF08type: markdown_kramdown\uFF1B\u5EFA\u8BAE\u5199\u5230\u5F53\u524D\u76EE\u5F55 .tmp/\uFF09").option("--profile-data-json <json>", "tool/channel\uFF1Aprofile_data \u7247\u6BB5\uFF08JSON \u5B57\u7B26\u4E32\uFF0C\u4E0E API \u5408\u5E76\u89C4\u5219\u4E00\u81F4\uFF09").option("--profile-data-json-file <path>", "\u4ECE\u6587\u4EF6\u8BFB\u53D6 profile_data \u7247\u6BB5 JSON\uFF08\u4E0E --profile-data-json \u4E92\u65A5\uFF09").option("--favorited", "\u6807\u8BB0\u4E3A\u6536\u85CF").option("--unfavorited", "\u53D6\u6D88\u6536\u85CF").action(async (id, opts, cmd) => {
+intake.command("update").description("\u66F4\u65B0\u6536\u5F55").argument("<id>", "\u6536\u5F55 ID").option("-t, --title <title>", "\u65B0\u6807\u9898").option("-b, --body <text>", "\u65B0\u6B63\u6587\uFF08\u4E0D\u63A8\u8350\u76F4\u63A5\u4F20\uFF1B\u8BF7\u7528 --body-file\uFF09").option("--body-file <path>", "\u65B0\u6B63\u6587\u6587\u4EF6\u8DEF\u5F84\uFF08type: markdown_kramdown\uFF1B\u5EFA\u8BAE\u5199\u5230\u5F53\u524D\u76EE\u5F55 .tmp/\uFF09").option("--profile-data-json <json>", "tool/channel\uFF1Aprofile_data \u7247\u6BB5\uFF08JSON \u5B57\u7B26\u4E32\uFF0C\u4E0E API \u5408\u5E76\u89C4\u5219\u4E00\u81F4\uFF09").option("--profile-data-json-file <path>", "\u4ECE\u6587\u4EF6\u8BFB\u53D6 profile_data \u7247\u6BB5 JSON\uFF08\u4E0E --profile-data-json \u4E92\u65A5\uFF09").option("--favorited", "\u6807\u8BB0\u4E3A\u6536\u85CF").option("--unfavorited", "\u53D6\u6D88\u6536\u85CF").option("--publish", "\u53D1\u5E03\uFF08\u7533\u8BF7\u516C\u5F00\uFF09").option("--published", "\u76F4\u63A5\u53D1\u5E03\uFF08\u7BA1\u7406\u5458\u4E13\u7528\uFF09").option("--draft", "\u64A4\u56DE\u4E3A\u8349\u7A3F").action(async (id, opts, cmd) => {
   const { apiKey, client } = resolveApi(cmd);
   if (!apiKey) {
     console.error("\u9519\u8BEF\uFF1A\u672A\u914D\u7F6E API Key");
@@ -447,9 +447,12 @@ intake.command("update").description("\u66F4\u65B0\u6536\u5F55").argument("<id>"
   }
   if (opts.favorited) body.favorited = true;
   if (opts.unfavorited) body.favorited = false;
+  if (opts.publish) body.publication_status = "pending_review";
+  if (opts.published) body.publication_status = "published";
+  if (opts.draft) body.publication_status = "private";
   if (Object.keys(body).length === 0) {
     console.error(
-      "\u9519\u8BEF\uFF1A\u8BF7\u81F3\u5C11\u63D0\u4F9B --title\u3001--body/--body-file\u3001--profile-data-json/--profile-data-json-file \u6216 --favorited/--unfavorited"
+      "\u9519\u8BEF\uFF1A\u8BF7\u81F3\u5C11\u63D0\u4F9B --title\u3001--body/--body-file\u3001--profile-data-json/--profile-data-json-file\u3001--favorited/--unfavorited \u6216 --publish/--published/--draft"
     );
     process.exit(1);
   }
@@ -587,7 +590,7 @@ function buildKindCommand(kind, label) {
       process.exit(1);
     }
   });
-  cmd.command("update").description(`\u66F4\u65B0${label}`).argument("<id>", `${label} ID`).option("-t, --title <title>", "\u65B0\u6807\u9898").option("-b, --body <text>", "\u65B0\u6B63\u6587\uFF08\u4E0D\u63A8\u8350\u76F4\u63A5\u4F20\uFF1B\u8BF7\u7528 --body-file\uFF09").option("--body-file <path>", "\u65B0\u6B63\u6587\u6587\u4EF6\u8DEF\u5F84\uFF08type: markdown_kramdown\uFF1B\u5EFA\u8BAE\u5199\u5230\u5F53\u524D\u76EE\u5F55 .tmp/\uFF09").option("--favorited", "\u6807\u8BB0\u4E3A\u6536\u85CF").option("--unfavorited", "\u53D6\u6D88\u6536\u85CF").option("--refinement-status <status>", "\u6F0F\u6597\u5904\u7406\u72B6\u6001\uFF08signal\uFF09\uFF1Aapproved/ai_drafting/ai_drafted/rejected/dropped").action(async (id, opts, cmd2) => {
+  cmd.command("update").description(`\u66F4\u65B0${label}`).argument("<id>", `${label} ID`).option("-t, --title <title>", "\u65B0\u6807\u9898").option("-b, --body <text>", "\u65B0\u6B63\u6587\uFF08\u4E0D\u63A8\u8350\u76F4\u63A5\u4F20\uFF1B\u8BF7\u7528 --body-file\uFF09").option("--body-file <path>", "\u65B0\u6B63\u6587\u6587\u4EF6\u8DEF\u5F84\uFF08type: markdown_kramdown\uFF1B\u5EFA\u8BAE\u5199\u5230\u5F53\u524D\u76EE\u5F55 .tmp/\uFF09").option("--favorited", "\u6807\u8BB0\u4E3A\u6536\u85CF").option("--unfavorited", "\u53D6\u6D88\u6536\u85CF").option("--refinement-status <status>", "\u6F0F\u6597\u5904\u7406\u72B6\u6001\uFF08signal\uFF09\uFF1Aapproved/ai_drafting/ai_drafted/rejected/dropped").option("--publish", "\u53D1\u5E03\uFF08\u7533\u8BF7\u516C\u5F00\uFF09").option("--published", "\u76F4\u63A5\u53D1\u5E03\uFF08\u7BA1\u7406\u5458\u4E13\u7528\uFF09").option("--draft", "\u64A4\u56DE\u4E3A\u8349\u7A3F").action(async (id, opts, cmd2) => {
     const { apiKey, client } = resolveApi(cmd2);
     requireApiKey(apiKey);
     const body = {};
@@ -601,6 +604,9 @@ function buildKindCommand(kind, label) {
     if (opts.favorited) body.favorited = true;
     if (opts.unfavorited) body.favorited = false;
     if (opts.refinementStatus) body.refinement_status = opts.refinementStatus;
+    if (opts.publish) body.publication_status = "pending_review";
+    if (opts.published) body.publication_status = "published";
+    if (opts.draft) body.publication_status = "private";
     try {
       await client.patch(`/intakes/${id}`, body);
       console.log(`\u2705 ${label}\u66F4\u65B0\u6210\u529F`);
