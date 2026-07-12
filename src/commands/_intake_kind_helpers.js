@@ -98,6 +98,9 @@ export function buildKindCommand(kind, label) {
     .option("--favorited", "标记为收藏")
     .option("--unfavorited", "取消收藏")
     .option("--refinement-status <status>", "漏斗处理状态（signal）：approved/ai_drafting/ai_drafted/rejected/dropped")
+    .option("--publish", "发布（申请公开）")
+    .option("--published", "直接发布（管理员专用）")
+    .option("--draft", "撤回为草稿")
     .action(async (id, opts, cmd2) => {
       const { apiKey, client } = resolveApi(cmd2);
       requireApiKey(apiKey);
@@ -113,6 +116,9 @@ export function buildKindCommand(kind, label) {
       if (opts.favorited) body.favorited = true;
       if (opts.unfavorited) body.favorited = false;
       if (opts.refinementStatus) body.refinement_status = opts.refinementStatus;
+      if (opts.publish) body.publication_status = "pending_review";
+      if (opts.published) body.publication_status = "published";
+      if (opts.draft) body.publication_status = "private";
 
       try {
         await client.patch(`/intakes/${id}`, body);

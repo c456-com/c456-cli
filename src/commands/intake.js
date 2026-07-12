@@ -96,6 +96,9 @@ intake
   .option("--profile-data-json-file <path>", "从文件读取 profile_data 片段 JSON（与 --profile-data-json 互斥）")
   .option("--favorited", "标记为收藏")
   .option("--unfavorited", "取消收藏")
+  .option("--publish", "发布（申请公开）")
+  .option("--published", "直接发布（管理员专用）")
+  .option("--draft", "撤回为草稿")
   .action(async (id, opts, cmd) => {
     const { apiKey, client } = resolveApi(cmd);
 
@@ -134,10 +137,13 @@ intake
     }
     if (opts.favorited) body.favorited = true;
     if (opts.unfavorited) body.favorited = false;
+    if (opts.publish) body.publication_status = "pending_review";
+    if (opts.published) body.publication_status = "published";
+    if (opts.draft) body.publication_status = "private";
 
     if (Object.keys(body).length === 0) {
       console.error(
-        "错误：请至少提供 --title、--body/--body-file、--profile-data-json/--profile-data-json-file 或 --favorited/--unfavorited",
+        "错误：请至少提供 --title、--body/--body-file、--profile-data-json/--profile-data-json-file、--favorited/--unfavorited 或 --publish/--published/--draft",
       );
       process.exit(1);
     }
