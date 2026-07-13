@@ -16,11 +16,17 @@ playbookCmd
   .option("--body-file <path>", "打法正文文件路径（type: markdown_kramdown；建议写到当前目录 .tmp/）")
   .option("--ref-intake <id>", "引用收录 ID（可多次指定）")
   .option("--ref-playbook <id>", "引用打法 ID（可多次指定）")
+  .option("--description <text>", "卡片描述文字（优先于正文截取）")
+  .option("--description-file <path>", "从文件读取卡片描述文字")
   .action(async (opts, cmd) => {
     const { apiKey, client } = resolveApi(cmd);
 
     if (!apiKey) {
       console.error("错误：未配置 API Key");
+      process.exit(1);
+    }
+    if (opts.description && opts.descriptionFile) {
+      console.error("错误：--description 与 --description-file 不能同时使用");
       process.exit(1);
     }
 
@@ -50,6 +56,8 @@ playbookCmd
         title: opts.title,
         body: bodyText,
       };
+      if (opts.description) body.description = opts.description;
+      if (opts.descriptionFile) body.description = readTextFile(opts.descriptionFile);
 
       if (referenceTargets.length > 0) {
         body.reference_targets = referenceTargets;
@@ -121,11 +129,17 @@ playbookCmd
   .option("--unfavorited", "取消收藏")
   .option("--featured", "标记为精华")
   .option("--unfeatured", "取消精华")
+  .option("--description <text>", "卡片描述文字（优先于正文截取）")
+  .option("--description-file <path>", "从文件读取卡片描述文字")
   .action(async (id, opts, cmd) => {
     const { apiKey, client } = resolveApi(cmd);
 
     if (!apiKey) {
       console.error("错误：未配置 API Key");
+      process.exit(1);
+    }
+    if (opts.description && opts.descriptionFile) {
+      console.error("错误：--description 与 --description-file 不能同时使用");
       process.exit(1);
     }
 
@@ -138,6 +152,8 @@ playbookCmd
     }
     if (opts.bodyFile) body.body = readTextFile(opts.bodyFile);
     if (opts.body) body.body = opts.body;
+    if (opts.description) body.description = opts.description;
+    if (opts.descriptionFile) body.description = readTextFile(opts.descriptionFile);
     if (opts.publish) body.publication_status = "pending_review";
     if (opts.published) body.publication_status = "published";
     if (opts.draft) body.publication_status = "private";

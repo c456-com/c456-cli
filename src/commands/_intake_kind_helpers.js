@@ -25,6 +25,8 @@ export function buildKindCommand(kind, label) {
     .option("--body-file <path>", "正文文件路径（type: markdown_kramdown；建议写到当前目录 .tmp/）")
     .option("--profile-data-json <json>", "资料段 JSON（tool/channel）")
     .option("--auto-resolve-url", "自动解析 URL 并填充资料段 profile_data（仅 tool/channel；会发起网络请求）")
+    .option("--description <text>", "卡片描述文字（优先于正文截取）")
+    .option("--description-file <path>", "从文件读取卡片描述文字")
     .action(async (opts, cmd2) => {
       const { apiKey, client } = resolveApi(cmd2);
       requireApiKey(apiKey);
@@ -33,12 +35,18 @@ export function buildKindCommand(kind, label) {
         console.error("错误：--body 与 --body-file 不能同时使用");
         process.exit(1);
       }
+      if (opts.description && opts.descriptionFile) {
+        console.error("错误：--description 与 --description-file 不能同时使用");
+        process.exit(1);
+      }
       const bodyText = opts.bodyFile ? readTextFile(opts.bodyFile) : (opts.body || "");
       const body = {
         kind,
         title: opts.title || "",
         body: bodyText,
       };
+      if (opts.description) body.description = opts.description;
+      if (opts.descriptionFile) body.description = readTextFile(opts.descriptionFile);
       if (opts.url) body.url = opts.url;
       if (opts.profileDataJson) body.profile_data_json = opts.profileDataJson;
 
@@ -101,6 +109,8 @@ export function buildKindCommand(kind, label) {
     .option("--publish", "发布（申请公开）")
     .option("--published", "直接发布（管理员专用）")
     .option("--draft", "撤回为草稿")
+    .option("--description <text>", "卡片描述文字（优先于正文截取）")
+    .option("--description-file <path>", "从文件读取卡片描述文字")
     .action(async (id, opts, cmd2) => {
       const { apiKey, client } = resolveApi(cmd2);
       requireApiKey(apiKey);
@@ -111,8 +121,14 @@ export function buildKindCommand(kind, label) {
         console.error("错误：--body 与 --body-file 不能同时使用");
         process.exit(1);
       }
+      if (opts.description && opts.descriptionFile) {
+        console.error("错误：--description 与 --description-file 不能同时使用");
+        process.exit(1);
+      }
       if (opts.bodyFile) body.body = readTextFile(opts.bodyFile);
       if (opts.body) body.body = opts.body;
+      if (opts.description) body.description = opts.description;
+      if (opts.descriptionFile) body.description = readTextFile(opts.descriptionFile);
       if (opts.favorited) body.favorited = true;
       if (opts.unfavorited) body.favorited = false;
       if (opts.refinementStatus) body.refinement_status = opts.refinementStatus;

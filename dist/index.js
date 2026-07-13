@@ -6,7 +6,7 @@ import { Command as Command13 } from "commander";
 // package.json
 var package_default = {
   name: "c456-cli",
-  version: "0.9.0",
+  version: "0.10.0",
   description: "C456 CLI - \u5185\u5BB9\u5F55\u5165\u4E0E\u6574\u7406\u5DE5\u5177",
   type: "module",
   bin: {
@@ -536,11 +536,15 @@ function requireApiKey(apiKey) {
 }
 function buildKindCommand(kind, label) {
   const cmd = new Command2().name(kind).description(`${label} \u7BA1\u7406 - \u521B\u5EFA\u3001\u66F4\u65B0\u3001\u5220\u9664\u3001\u5217\u8868`);
-  cmd.command("new").description(`\u521B\u5EFA\u65B0${label}`).option("-u, --url <url>", "\u76EE\u6807 URL\uFF08tool/channel \u65F6\u53EF\u9009\uFF1B\u914D\u5408 --auto-resolve-url \u53EF\u81EA\u52A8\u89E3\u6790\u8D44\u6599\uFF09").option("-t, --title <title>", "\u6807\u9898\uFF08tool/channel \u5FC5\u586B\uFF1Bsignal \u53EF\u9009\uFF09").option("-b, --body <text>", "\u6B63\u6587/\u63CF\u8FF0\uFF08\u4E0D\u63A8\u8350\u76F4\u63A5\u4F20\uFF1B\u8BF7\u7528 --body-file\uFF09").option("--body-file <path>", "\u6B63\u6587\u6587\u4EF6\u8DEF\u5F84\uFF08type: markdown_kramdown\uFF1B\u5EFA\u8BAE\u5199\u5230\u5F53\u524D\u76EE\u5F55 .tmp/\uFF09").option("--profile-data-json <json>", "\u8D44\u6599\u6BB5 JSON\uFF08tool/channel\uFF09").option("--auto-resolve-url", "\u81EA\u52A8\u89E3\u6790 URL \u5E76\u586B\u5145\u8D44\u6599\u6BB5 profile_data\uFF08\u4EC5 tool/channel\uFF1B\u4F1A\u53D1\u8D77\u7F51\u7EDC\u8BF7\u6C42\uFF09").action(async (opts, cmd2) => {
+  cmd.command("new").description(`\u521B\u5EFA\u65B0${label}`).option("-u, --url <url>", "\u76EE\u6807 URL\uFF08tool/channel \u65F6\u53EF\u9009\uFF1B\u914D\u5408 --auto-resolve-url \u53EF\u81EA\u52A8\u89E3\u6790\u8D44\u6599\uFF09").option("-t, --title <title>", "\u6807\u9898\uFF08tool/channel \u5FC5\u586B\uFF1Bsignal \u53EF\u9009\uFF09").option("-b, --body <text>", "\u6B63\u6587/\u63CF\u8FF0\uFF08\u4E0D\u63A8\u8350\u76F4\u63A5\u4F20\uFF1B\u8BF7\u7528 --body-file\uFF09").option("--body-file <path>", "\u6B63\u6587\u6587\u4EF6\u8DEF\u5F84\uFF08type: markdown_kramdown\uFF1B\u5EFA\u8BAE\u5199\u5230\u5F53\u524D\u76EE\u5F55 .tmp/\uFF09").option("--profile-data-json <json>", "\u8D44\u6599\u6BB5 JSON\uFF08tool/channel\uFF09").option("--auto-resolve-url", "\u81EA\u52A8\u89E3\u6790 URL \u5E76\u586B\u5145\u8D44\u6599\u6BB5 profile_data\uFF08\u4EC5 tool/channel\uFF1B\u4F1A\u53D1\u8D77\u7F51\u7EDC\u8BF7\u6C42\uFF09").option("--description <text>", "\u5361\u7247\u63CF\u8FF0\u6587\u5B57\uFF08\u4F18\u5148\u4E8E\u6B63\u6587\u622A\u53D6\uFF09").option("--description-file <path>", "\u4ECE\u6587\u4EF6\u8BFB\u53D6\u5361\u7247\u63CF\u8FF0\u6587\u5B57").action(async (opts, cmd2) => {
     const { apiKey, client } = resolveApi(cmd2);
     requireApiKey(apiKey);
     if (opts.body && opts.bodyFile) {
       console.error("\u9519\u8BEF\uFF1A--body \u4E0E --body-file \u4E0D\u80FD\u540C\u65F6\u4F7F\u7528");
+      process.exit(1);
+    }
+    if (opts.description && opts.descriptionFile) {
+      console.error("\u9519\u8BEF\uFF1A--description \u4E0E --description-file \u4E0D\u80FD\u540C\u65F6\u4F7F\u7528");
       process.exit(1);
     }
     const bodyText = opts.bodyFile ? readTextFile(opts.bodyFile) : opts.body || "";
@@ -549,6 +553,8 @@ function buildKindCommand(kind, label) {
       title: opts.title || "",
       body: bodyText
     };
+    if (opts.description) body.description = opts.description;
+    if (opts.descriptionFile) body.description = readTextFile(opts.descriptionFile);
     if (opts.url) body.url = opts.url;
     if (opts.profileDataJson) body.profile_data_json = opts.profileDataJson;
     if (opts.autoResolveUrl) {
@@ -590,7 +596,7 @@ function buildKindCommand(kind, label) {
       process.exit(1);
     }
   });
-  cmd.command("update").description(`\u66F4\u65B0${label}`).argument("<id>", `${label} ID`).option("-t, --title <title>", "\u65B0\u6807\u9898").option("-b, --body <text>", "\u65B0\u6B63\u6587\uFF08\u4E0D\u63A8\u8350\u76F4\u63A5\u4F20\uFF1B\u8BF7\u7528 --body-file\uFF09").option("--body-file <path>", "\u65B0\u6B63\u6587\u6587\u4EF6\u8DEF\u5F84\uFF08type: markdown_kramdown\uFF1B\u5EFA\u8BAE\u5199\u5230\u5F53\u524D\u76EE\u5F55 .tmp/\uFF09").option("--favorited", "\u6807\u8BB0\u4E3A\u6536\u85CF").option("--unfavorited", "\u53D6\u6D88\u6536\u85CF").option("--refinement-status <status>", "\u6F0F\u6597\u5904\u7406\u72B6\u6001\uFF08signal\uFF09\uFF1Aapproved/ai_drafting/ai_drafted/rejected/dropped").option("--publish", "\u53D1\u5E03\uFF08\u7533\u8BF7\u516C\u5F00\uFF09").option("--published", "\u76F4\u63A5\u53D1\u5E03\uFF08\u7BA1\u7406\u5458\u4E13\u7528\uFF09").option("--draft", "\u64A4\u56DE\u4E3A\u8349\u7A3F").action(async (id, opts, cmd2) => {
+  cmd.command("update").description(`\u66F4\u65B0${label}`).argument("<id>", `${label} ID`).option("-t, --title <title>", "\u65B0\u6807\u9898").option("-b, --body <text>", "\u65B0\u6B63\u6587\uFF08\u4E0D\u63A8\u8350\u76F4\u63A5\u4F20\uFF1B\u8BF7\u7528 --body-file\uFF09").option("--body-file <path>", "\u65B0\u6B63\u6587\u6587\u4EF6\u8DEF\u5F84\uFF08type: markdown_kramdown\uFF1B\u5EFA\u8BAE\u5199\u5230\u5F53\u524D\u76EE\u5F55 .tmp/\uFF09").option("--favorited", "\u6807\u8BB0\u4E3A\u6536\u85CF").option("--unfavorited", "\u53D6\u6D88\u6536\u85CF").option("--refinement-status <status>", "\u6F0F\u6597\u5904\u7406\u72B6\u6001\uFF08signal\uFF09\uFF1Aapproved/ai_drafting/ai_drafted/rejected/dropped").option("--publish", "\u53D1\u5E03\uFF08\u7533\u8BF7\u516C\u5F00\uFF09").option("--published", "\u76F4\u63A5\u53D1\u5E03\uFF08\u7BA1\u7406\u5458\u4E13\u7528\uFF09").option("--draft", "\u64A4\u56DE\u4E3A\u8349\u7A3F").option("--description <text>", "\u5361\u7247\u63CF\u8FF0\u6587\u5B57\uFF08\u4F18\u5148\u4E8E\u6B63\u6587\u622A\u53D6\uFF09").option("--description-file <path>", "\u4ECE\u6587\u4EF6\u8BFB\u53D6\u5361\u7247\u63CF\u8FF0\u6587\u5B57").action(async (id, opts, cmd2) => {
     const { apiKey, client } = resolveApi(cmd2);
     requireApiKey(apiKey);
     const body = {};
@@ -599,8 +605,14 @@ function buildKindCommand(kind, label) {
       console.error("\u9519\u8BEF\uFF1A--body \u4E0E --body-file \u4E0D\u80FD\u540C\u65F6\u4F7F\u7528");
       process.exit(1);
     }
+    if (opts.description && opts.descriptionFile) {
+      console.error("\u9519\u8BEF\uFF1A--description \u4E0E --description-file \u4E0D\u80FD\u540C\u65F6\u4F7F\u7528");
+      process.exit(1);
+    }
     if (opts.bodyFile) body.body = readTextFile(opts.bodyFile);
     if (opts.body) body.body = opts.body;
+    if (opts.description) body.description = opts.description;
+    if (opts.descriptionFile) body.description = readTextFile(opts.descriptionFile);
     if (opts.favorited) body.favorited = true;
     if (opts.unfavorited) body.favorited = false;
     if (opts.refinementStatus) body.refinement_status = opts.refinementStatus;
@@ -820,10 +832,14 @@ var search_default = searchCmd;
 // src/commands/playbook.js
 import { Command as Command6 } from "commander";
 var playbookCmd = new Command6().name("playbook").description("\u6253\u6CD5\u7BA1\u7406 - \u521B\u5EFA\u3001\u66F4\u65B0\u3001\u5220\u9664\u6253\u6CD5");
-playbookCmd.command("new").description("\u521B\u5EFA\u65B0\u6253\u6CD5").requiredOption("-t, --title <title>", "\u6253\u6CD5\u6807\u9898").option("-b, --body <text>", "\u6253\u6CD5\u6B63\u6587\uFF08\u4E0D\u63A8\u8350\u76F4\u63A5\u4F20\uFF1B\u8BF7\u7528 --body-file\uFF09").option("--body-file <path>", "\u6253\u6CD5\u6B63\u6587\u6587\u4EF6\u8DEF\u5F84\uFF08type: markdown_kramdown\uFF1B\u5EFA\u8BAE\u5199\u5230\u5F53\u524D\u76EE\u5F55 .tmp/\uFF09").option("--ref-intake <id>", "\u5F15\u7528\u6536\u5F55 ID\uFF08\u53EF\u591A\u6B21\u6307\u5B9A\uFF09").option("--ref-playbook <id>", "\u5F15\u7528\u6253\u6CD5 ID\uFF08\u53EF\u591A\u6B21\u6307\u5B9A\uFF09").action(async (opts, cmd) => {
+playbookCmd.command("new").description("\u521B\u5EFA\u65B0\u6253\u6CD5").requiredOption("-t, --title <title>", "\u6253\u6CD5\u6807\u9898").option("-b, --body <text>", "\u6253\u6CD5\u6B63\u6587\uFF08\u4E0D\u63A8\u8350\u76F4\u63A5\u4F20\uFF1B\u8BF7\u7528 --body-file\uFF09").option("--body-file <path>", "\u6253\u6CD5\u6B63\u6587\u6587\u4EF6\u8DEF\u5F84\uFF08type: markdown_kramdown\uFF1B\u5EFA\u8BAE\u5199\u5230\u5F53\u524D\u76EE\u5F55 .tmp/\uFF09").option("--ref-intake <id>", "\u5F15\u7528\u6536\u5F55 ID\uFF08\u53EF\u591A\u6B21\u6307\u5B9A\uFF09").option("--ref-playbook <id>", "\u5F15\u7528\u6253\u6CD5 ID\uFF08\u53EF\u591A\u6B21\u6307\u5B9A\uFF09").option("--description <text>", "\u5361\u7247\u63CF\u8FF0\u6587\u5B57\uFF08\u4F18\u5148\u4E8E\u6B63\u6587\u622A\u53D6\uFF09").option("--description-file <path>", "\u4ECE\u6587\u4EF6\u8BFB\u53D6\u5361\u7247\u63CF\u8FF0\u6587\u5B57").action(async (opts, cmd) => {
   const { apiKey, client } = resolveApi(cmd);
   if (!apiKey) {
     console.error("\u9519\u8BEF\uFF1A\u672A\u914D\u7F6E API Key");
+    process.exit(1);
+  }
+  if (opts.description && opts.descriptionFile) {
+    console.error("\u9519\u8BEF\uFF1A--description \u4E0E --description-file \u4E0D\u80FD\u540C\u65F6\u4F7F\u7528");
     process.exit(1);
   }
   const referenceTargets = [];
@@ -849,6 +865,8 @@ playbookCmd.command("new").description("\u521B\u5EFA\u65B0\u6253\u6CD5").require
       title: opts.title,
       body: bodyText
     };
+    if (opts.description) body.description = opts.description;
+    if (opts.descriptionFile) body.description = readTextFile(opts.descriptionFile);
     if (referenceTargets.length > 0) {
       body.reference_targets = referenceTargets;
     }
@@ -891,10 +909,14 @@ ${data.body || "(\u65E0)"}`);
     process.exit(1);
   }
 });
-playbookCmd.command("update").description("\u66F4\u65B0\u6253\u6CD5").argument("<id>", "\u6253\u6CD5 ID").option("-t, --title <title>", "\u65B0\u6807\u9898").option("-b, --body <text>", "\u65B0\u6B63\u6587\uFF08\u4E0D\u63A8\u8350\u76F4\u63A5\u4F20\uFF1B\u8BF7\u7528 --body-file\uFF09").option("--body-file <path>", "\u65B0\u6B63\u6587\u6587\u4EF6\u8DEF\u5F84\uFF08type: markdown_kramdown\uFF1B\u5EFA\u8BAE\u5199\u5230\u5F53\u524D\u76EE\u5F55 .tmp/\uFF09").option("--publish", "\u53D1\u5E03\uFF08\u7533\u8BF7\u516C\u5F00\uFF09").option("--published", "\u76F4\u63A5\u53D1\u5E03\uFF08\u7BA1\u7406\u5458\u4E13\u7528\uFF09").option("--draft", "\u64A4\u56DE\u4E3A\u8349\u7A3F").option("--favorited", "\u6807\u8BB0\u4E3A\u6536\u85CF").option("--unfavorited", "\u53D6\u6D88\u6536\u85CF").option("--featured", "\u6807\u8BB0\u4E3A\u7CBE\u534E").option("--unfeatured", "\u53D6\u6D88\u7CBE\u534E").action(async (id, opts, cmd) => {
+playbookCmd.command("update").description("\u66F4\u65B0\u6253\u6CD5").argument("<id>", "\u6253\u6CD5 ID").option("-t, --title <title>", "\u65B0\u6807\u9898").option("-b, --body <text>", "\u65B0\u6B63\u6587\uFF08\u4E0D\u63A8\u8350\u76F4\u63A5\u4F20\uFF1B\u8BF7\u7528 --body-file\uFF09").option("--body-file <path>", "\u65B0\u6B63\u6587\u6587\u4EF6\u8DEF\u5F84\uFF08type: markdown_kramdown\uFF1B\u5EFA\u8BAE\u5199\u5230\u5F53\u524D\u76EE\u5F55 .tmp/\uFF09").option("--publish", "\u53D1\u5E03\uFF08\u7533\u8BF7\u516C\u5F00\uFF09").option("--published", "\u76F4\u63A5\u53D1\u5E03\uFF08\u7BA1\u7406\u5458\u4E13\u7528\uFF09").option("--draft", "\u64A4\u56DE\u4E3A\u8349\u7A3F").option("--favorited", "\u6807\u8BB0\u4E3A\u6536\u85CF").option("--unfavorited", "\u53D6\u6D88\u6536\u85CF").option("--featured", "\u6807\u8BB0\u4E3A\u7CBE\u534E").option("--unfeatured", "\u53D6\u6D88\u7CBE\u534E").option("--description <text>", "\u5361\u7247\u63CF\u8FF0\u6587\u5B57\uFF08\u4F18\u5148\u4E8E\u6B63\u6587\u622A\u53D6\uFF09").option("--description-file <path>", "\u4ECE\u6587\u4EF6\u8BFB\u53D6\u5361\u7247\u63CF\u8FF0\u6587\u5B57").action(async (id, opts, cmd) => {
   const { apiKey, client } = resolveApi(cmd);
   if (!apiKey) {
     console.error("\u9519\u8BEF\uFF1A\u672A\u914D\u7F6E API Key");
+    process.exit(1);
+  }
+  if (opts.description && opts.descriptionFile) {
+    console.error("\u9519\u8BEF\uFF1A--description \u4E0E --description-file \u4E0D\u80FD\u540C\u65F6\u4F7F\u7528");
     process.exit(1);
   }
   const body = {};
@@ -905,6 +927,8 @@ playbookCmd.command("update").description("\u66F4\u65B0\u6253\u6CD5").argument("
   }
   if (opts.bodyFile) body.body = readTextFile(opts.bodyFile);
   if (opts.body) body.body = opts.body;
+  if (opts.description) body.description = opts.description;
+  if (opts.descriptionFile) body.description = readTextFile(opts.descriptionFile);
   if (opts.publish) body.publication_status = "pending_review";
   if (opts.published) body.publication_status = "published";
   if (opts.draft) body.publication_status = "private";
